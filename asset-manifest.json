@@ -1,15 +1,15 @@
 {
   "files": {
-    "main.css": "/static/css/main.5a2a8526.css",
-    "main.js": "/static/js/main.cf19e13f.js",
-    "static/js/453.17fd6980.chunk.js": "/static/js/453.17fd6980.chunk.js",
-    "index.html": "/index.html",
-    "main.5a2a8526.css.map": "/static/css/main.5a2a8526.css.map",
-    "main.cf19e13f.js.map": "/static/js/main.cf19e13f.js.map",
-    "453.17fd6980.chunk.js.map": "/static/js/453.17fd6980.chunk.js.map"
+    "main.css": "/autobloom-deployed-prototype/static/css/main.5a2a8526.css",
+    "main.js": "/autobloom-deployed-prototype/static/js/main.78e4cf0e.js",
+    "static/js/453.17fd6980.chunk.js": "/autobloom-deployed-prototype/static/js/453.17fd6980.chunk.js",
+    "index.html": "/autobloom-deployed-prototype/index.html",
+    "main.5a2a8526.css.map": "/autobloom-deployed-prototype/static/css/main.5a2a8526.css.map",
+    "main.78e4cf0e.js.map": "/autobloom-deployed-prototype/static/js/main.78e4cf0e.js.map",
+    "453.17fd6980.chunk.js.map": "/autobloom-deployed-prototype/static/js/453.17fd6980.chunk.js.map"
   },
   "entrypoints": [
     "static/css/main.5a2a8526.css",
-    "static/js/main.cf19e13f.js"
+    "static/js/main.78e4cf0e.js"
   ]
 }
