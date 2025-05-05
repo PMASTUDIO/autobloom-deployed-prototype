@@ -1,15 +1,15 @@
 {
   "files": {
     "main.css": "/autobloom-deployed-prototype/static/css/main.5a2a8526.css",
-    "main.js": "/autobloom-deployed-prototype/static/js/main.2e55e7b4.js",
+    "main.js": "/autobloom-deployed-prototype/static/js/main.b9b81b23.js",
     "static/js/453.17fd6980.chunk.js": "/autobloom-deployed-prototype/static/js/453.17fd6980.chunk.js",
     "index.html": "/autobloom-deployed-prototype/index.html",
     "main.5a2a8526.css.map": "/autobloom-deployed-prototype/static/css/main.5a2a8526.css.map",
-    "main.2e55e7b4.js.map": "/autobloom-deployed-prototype/static/js/main.2e55e7b4.js.map",
+    "main.b9b81b23.js.map": "/autobloom-deployed-prototype/static/js/main.b9b81b23.js.map",
     "453.17fd6980.chunk.js.map": "/autobloom-deployed-prototype/static/js/453.17fd6980.chunk.js.map"
   },
   "entrypoints": [
     "static/css/main.5a2a8526.css",
-    "static/js/main.2e55e7b4.js"
+    "static/js/main.b9b81b23.js"
   ]
 }
