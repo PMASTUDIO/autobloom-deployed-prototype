@@ -28,7 +28,7 @@
       async function connectToESP32(service_uuid, characteristic_uuid) {
         try {
           const device = await navigator.bluetooth.requestDevice({
-            filters: [],
+            filters: [{ namePrefix: "ESP32" }],
             optionalServices: [service_uuid],
           });
 
