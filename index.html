@@ -24,5 +24,41 @@
   <body>
     <noscript>You need to enable JavaScript to run this app.</noscript>
     <div id="root"></div>
+    <script>
+      async function connectToESP32(service_uuid, characteristic_uuid) {
+        try {
+          const device = await navigator.bluetooth.requestDevice({
+            filters: [{ namePrefix: "ESP32" }],
+            optionalServices: [service_uuid],
+          });
+
+          const server = await device.gatt.connect();
+
+          const service = await server.getPrimaryService(service_uuid);
+          const characteristic = await service.getCharacteristic(
+            characteristic_uuid
+          );
+
+          characteristic.addEventListener(
+            "characteristicvaluechanged",
+            (event) => {
+              const value = new TextDecoder().decode(event.target.value);
+              console.log("Received:", value);
+            }
+          );
+
+          await characteristic.startNotifications();
+          console.log("Connected and listening for notifications...");
+        } catch (error) {
+          console.error("Connection failed!", error);
+        }
+      }
+
+      // document.onload = async () => {
+      //   await connectToESP32("0000ffe0-0000-1000-8000-00805f9b34fb");
+      // };
+
+      window.connectToESP32 = connectToESP32;
+    </script>
   </body>
 </html>
