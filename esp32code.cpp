@@ -5,10 +5,13 @@
 #define SERVICE_UUID "0000ffe0-0000-1000-8000-00805f9b34fb"
 #define CHARACTERISTIC_UUID "0000ffe1-0000-1000-8000-00805f9b34fb"
 
+const int RELAY_CTRL_PIN = 26; // Relay control
+const int MOISTURE_PIN = 36;   // Soil sensor
+
 BLECharacteristic *pCharacteristic;
 bool deviceConnected = false;
 
-class MyServerCallbacks : public BLEServerCallbacks
+class ServerCallback : public BLEServerCallbacks
 {
   void onConnect(BLEServer *pServer)
   {
@@ -25,11 +28,14 @@ class MyServerCallbacks : public BLEServerCallbacks
 
 void setup()
 {
+  pinMode(RELAY_CTRL_PIN, OUTPUT);
   Serial.begin(115200);
+  Serial.println("Starting motor and moisture readings...");
+
   BLEDevice::init("ESP32-BLE");
 
   BLEServer *pServer = BLEDevice::createServer();
-  pServer->setCallbacks(new MyServerCallbacks());
+  pServer->setCallbacks(new ServerCallback());
 
   BLEService *pService = pServer->createService(SERVICE_UUID);
 
@@ -50,6 +56,26 @@ void setup()
 
 void loop()
 {
+  // Turn ON the pump
+  digitalWrite(RELAY_CTRL_PIN, HIGH); // Transistor ON → Relay ON → Pump ON
+  Serial.println("Pump ON");
+
+  // Read moisture
+  int moistureValue = analogRead(MOISTURE_PIN); // 0 to 4095
+  Serial.print("Moisture analog value: ");
+  Serial.println(moistureValue);
+
+  delay(2000); // Wait 2 seconds
+
+  // Turn OFF the pump
+  digitalWrite(RELAY_CTRL_PIN, LOW); // Transistor OFF → Relay OFF → Pump OFF
+  Serial.println("Pump OFF");
+
+  // Read moisture again
+  moistureValue = analogRead(MOISTURE_PIN);
+  Serial.print("Moisture analog value: ");
+  Serial.println(moistureValue);
+
   if (deviceConnected)
   {
     static unsigned long lastSent = 0;
@@ -62,4 +88,6 @@ void loop()
       lastSent = millis();
     }
   }
+
+  delay(2000); // Wait 2 seconds
 }
