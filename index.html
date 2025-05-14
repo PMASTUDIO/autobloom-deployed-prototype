@@ -71,7 +71,10 @@
 
           if (resyncBtn) {
             resyncBtn.addEventListener("click", async () => {
-              await connectToESP32();
+              await connectToESP32(
+                "4c60acaa-e88a-4f2b-9e24-efe3bc35a522",
+                "4c60acaa-e88a-4f2b-9e24-efe3bc35a522"
+              );
             });
           }
         }, 1500);
