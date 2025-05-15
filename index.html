@@ -78,9 +78,10 @@
               console.log("Value: ", value);
 
               let parsedData = parseData(value);
-              console.log(parsedData);
 
-              humidityLevelDOM.innerHTML = parsedData["moist"];
+              if (parsedData["moist"]) {
+                humidityLevelDOM.innerHTML = parsedData["moist"];
+              }
             }
           } catch (error) {
             console.error("Error during reading: ", error);
