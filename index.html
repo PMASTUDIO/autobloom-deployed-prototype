@@ -80,7 +80,7 @@
               let parsedData = parseData(value);
               console.log(parsedData);
 
-              humidityLevelDOM.innerHTML = parseData["hum"];
+              humidityLevelDOM.innerHTML = parseData["moist"];
             }
           } catch (error) {
             console.error("Error during reading: ", error);
@@ -103,6 +103,8 @@
           .catch((error) => {
             console.error("Error writing to serial port: ", error);
           });
+
+        writer.releaseLock();
       }
 
       function parseData(textData) {
