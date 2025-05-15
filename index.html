@@ -90,11 +90,19 @@
         }
       }
 
-      async function writeData(port, textData) {
-        const encoder = new TextEncoder();
-        const writer = port.writable.getWriter();
-        await writer.write(encoder.encode(textData));
-        writer.releaseLock();
+      async function writeData(port, integerData) {
+        const data = new Uint8Array(new Uint16Array([integerData]).buffer);
+
+        // Step 3: Write Data
+        port.writable
+          .getWriter()
+          .write(data)
+          .then(() => {
+            console.log("Data written to serial port");
+          })
+          .catch((error) => {
+            console.error("Error writing to serial port: ", error);
+          });
       }
 
       function parseData(textData) {
@@ -103,6 +111,8 @@
 
         return { moist: splitStr[0], hum: splitStr[1] };
       }
+
+      let port = null;
 
       window.onload = async () => {
         setTimeout(async () => {
@@ -121,8 +131,6 @@
 
           window.connectToSerial = connectToSerial;
           window.readData = readData;
-
-          var port = null;
 
           if (resyncBtn) {
             resyncBtn.addEventListener("click", async () => {
