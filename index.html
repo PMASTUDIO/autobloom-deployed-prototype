@@ -25,59 +25,83 @@
     <noscript>You need to enable JavaScript to run this app.</noscript>
     <div id="root"></div>
     <script>
-      async function connectToESP32(service_uuid, characteristic_uuid) {
+      class LineBreakTransformer {
+        constructor() {
+          this.container = "";
+        }
+
+        transform(chunk, controller) {
+          this.container += chunk;
+          const lines = this.container.split("\r\n");
+          this.container = lines.pop();
+          lines.forEach((line) => controller.enqueue(line));
+        }
+
+        flush(controller) {
+          controller.enqueue(this.container);
+        }
+      }
+
+      async function connectToSerial(usbVendorId = 0x2341) {
         try {
-          const device = await navigator.bluetooth.requestDevice({
-            filters: [{ namePrefix: "ESP32" }],
-            optionalServices: [service_uuid],
+          const filter = { usbVendorId: usbVendorId };
+          const port = await navigator.serial.requestPort({
+            filters: [filter],
           });
 
-          const server = await device.gatt.connect();
+          console.log("Found port");
+          await port.open({ baudRate: 115200 });
+          console.log("Ready to go!");
 
-          const service = await server.getPrimaryService(service_uuid);
-          const characteristic = await service.getCharacteristic(
-            characteristic_uuid
-          );
-
-          characteristic.addEventListener(
-            "characteristicvaluechanged",
-            (event) => {
-              const value = new TextDecoder().decode(event.target.value);
-              console.log("Received:", value);
-
-              if (humidityLevel) humidityLevel.innerHTML = `${value}%`;
-            }
-          );
-
-          await characteristic.startNotifications();
-          console.log("Connected and listening for notifications...");
+          return port;
         } catch (error) {
           console.error("Connection failed!", error);
+          return null;
+        }
+      }
+
+      async function readData() {
+        while (port.readable) {
+          const reader = port.readable.getReader();
+          try {
+            while (true) {
+              const { value, done } = await reader.read();
+              if (done) {
+                // |reader| has been canceled.
+                break;
+              }
+              console.log("Value: ", value);
+            }
+          } catch (error) {
+            console.error("Error during reading: ", error);
+          } finally {
+            reader.releaseLock();
+          }
         }
       }
 
       window.onload = async () => {
         console.log("Ready");
-        setInterval(async () => {
-          var humidityLevel = document.querySelector(
-            "#root > div > div > div > div > div > div:nth-child(4) > div > div:nth-child(1) > div > h1"
-          );
+        var humidityLevel = document.querySelector(
+          "#root > div > div > div > div > div > div:nth-child(4) > div > div:nth-child(1) > div > h1"
+        );
 
-          var resyncBtn = document.querySelector(
-            "#root > div > div > div > div > div > div.rt-Box.rt-r-mt-4 > div > button:nth-child(2)"
-          );
+        var resyncBtn = document.querySelector(
+          "#root > div > div > div > div > div > div.rt-Box.rt-r-mt-4 > div > button:nth-child(2)"
+        );
 
-          window.connectToESP32 = connectToESP32;
+        window.connectToSerial = connectToSerial;
+        window.readData = readData;
 
-          if (resyncBtn) {
-            resyncBtn.addEventListener("click", async () => {
-              await connectToESP32(
-                "0000ffe0-0000-1000-8000-00805f9b34fb",
-                "0000ffe0-0000-1000-8000-00805f9b34fb"
-              );
-            });
-          }
-        }, 1500);
+        if (resyncBtn) {
+          resyncBtn.addEventListener("click", async () => {
+            const port = await connectToSerial(0x2341);
+
+            if (port) {
+              await readData();
+            }
+          });
+        }
       };
     </script>
   </body>
