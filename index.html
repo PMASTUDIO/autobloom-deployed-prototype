@@ -151,6 +151,7 @@
             waterNowBtn.addEventListener("click", async () => {
               if (port) {
                 await writeData(port, 77);
+                await readData(humidityLevel);
               }
             });
           }
