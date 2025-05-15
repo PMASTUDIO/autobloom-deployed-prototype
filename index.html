@@ -80,7 +80,7 @@
               let parsedData = parseData(value);
               console.log(parsedData);
 
-              humidityLevelDOM.innerHTML = parseData["moist"];
+              humidityLevelDOM.innerHTML = parsedData["moist"];
             }
           } catch (error) {
             console.error("Error during reading: ", error);
@@ -94,8 +94,9 @@
         const data = new Uint8Array(new Uint16Array([integerData]).buffer);
 
         // Step 3: Write Data
-        port.writable
-          .getWriter()
+        const writer = port.writable.getWriter();
+
+        writer
           .write(data)
           .then(() => {
             console.log("Data written to serial port");
