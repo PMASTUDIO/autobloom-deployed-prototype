@@ -122,7 +122,7 @@
           window.connectToSerial = connectToSerial;
           window.readData = readData;
 
-          let port = null;
+          var port = null;
 
           if (resyncBtn) {
             resyncBtn.addEventListener("click", async () => {
@@ -137,7 +137,7 @@
           if (waterNowBtn) {
             waterNowBtn.addEventListener("click", async () => {
               if (port) {
-                await writeData("W");
+                await writeData(77);
               }
             });
           }
