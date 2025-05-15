@@ -90,7 +90,7 @@
         }
       }
 
-      async function writeData(textData) {
+      async function writeData(port, textData) {
         const encoder = new TextEncoder();
         const writer = port.writable.getWriter();
         await writer.write(encoder.encode(textData));
@@ -135,9 +135,10 @@
           }
 
           if (waterNowBtn) {
+            console.log("Asked to water!");
             waterNowBtn.addEventListener("click", async () => {
               if (port) {
-                await writeData(77);
+                await writeData(port, 77);
               }
             });
           }
