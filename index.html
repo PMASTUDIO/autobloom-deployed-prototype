@@ -141,7 +141,7 @@
           if (resyncBtn) {
             resyncBtn.addEventListener("click", async () => {
               await connectToSerial();
-              await startSerialLoop(humidityLevel, humidityLevel);
+              await startSerialLoop(humidityLevel, solarLevel);
             });
           }
 
