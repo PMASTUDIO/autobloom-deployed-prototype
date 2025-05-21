@@ -42,81 +42,76 @@
         }
       }
 
+      let port = null;
+      let writer = null;
+      let writeQueue = [];
+      let readingLoopRunning = false;
+
       async function connectToSerial(usbVendorId = 0x2341) {
         try {
-          const filter = { usbVendorId: usbVendorId };
-          const port = await navigator.serial.requestPort({
-            filters: [filter],
-          });
-
-          console.log("Found port");
+          const filter = { usbVendorId };
+          port = await navigator.serial.requestPort({ filters: [filter] });
           await port.open({ baudRate: 115200 });
-          console.log("Ready to go!");
 
-          return port;
-        } catch (error) {
-          console.error("Connection failed!", error);
-          return null;
+          console.log("Serial port opened");
+          writer = port.writable.getWriter(); // Keep one persistent writer
+        } catch (err) {
+          console.error("Serial connection failed", err);
         }
       }
 
-      async function readData(humidityLevelDOM) {
-        while (port.readable) {
-          const decoder = new TextDecoderStream();
-          const streamClosed = port.readable.pipeTo(decoder.writable);
-          const lineReader = decoder.readable
-            .pipeThrough(new TransformStream(new LineBreakTransformer()))
-            .getReader();
+      async function startSerialLoop(humidityLevelDOM) {
+        if (!port || !port.readable || readingLoopRunning) return;
 
+        const textDecoder = new TextDecoderStream();
+        const readableStreamClosed = port.readable.pipeTo(textDecoder.writable);
+        const lineReader = textDecoder.readable
+          .pipeThrough(new TransformStream(new LineBreakTransformer()))
+          .getReader();
+
+        readingLoopRunning = true;
+
+        while (true) {
           try {
-            while (true) {
-              const { value, done } = await lineReader.read();
-              if (done) {
-                // |reader| has been canceled.
-                break;
-              }
-              console.log("Value: ", value);
+            // Handle write queue
+            if (writeQueue.length > 0 && writer) {
+              const dataToWrite = writeQueue.shift();
+              const data = new Uint8Array(
+                new Uint16Array([dataToWrite]).buffer
+              );
+              await writer.write(data);
+              console.log("Wrote:", dataToWrite);
+            }
 
-              let parsedData = parseData(value);
+            // Read incoming data
+            const { value, done } = await lineReader.read();
+            if (done) {
+              console.log("Serial stream closed");
+              break;
+            }
 
-              if (parsedData["moist"]) {
-                humidityLevelDOM.innerHTML = parsedData["moist"];
+            if (value) {
+              console.log("Read:", value);
+              const parsed = parseData(value);
+              if (parsed.moist && humidityLevelDOM) {
+                humidityLevelDOM.innerText = parsed.moist;
               }
             }
-          } catch (error) {
-            console.error("Error during reading: ", error);
-          } finally {
-            reader.releaseLock();
+          } catch (err) {
+            console.error("Serial loop error", err);
+            break;
           }
         }
+
+        readingLoopRunning = false;
       }
 
-      async function writeData(port, integerData) {
-        const data = new Uint8Array(new Uint16Array([integerData]).buffer);
-
-        // Step 3: Write Data
-        const writer = port.writable.getWriter();
-
-        writer
-          .write(data)
-          .then(() => {
-            console.log("Data written to serial port");
-          })
-          .catch((error) => {
-            console.error("Error writing to serial port: ", error);
-          });
-
-        writer.releaseLock();
+      function parseData(text) {
+        const parts = text.split("|");
+        return parts.length === 2
+          ? { moist: parts[0], hum: parts[1] }
+          : { moist: null, hum: null };
       }
-
-      function parseData(textData) {
-        let splitStr = textData.split("|");
-        if (splitStr.length != 2) return { moist: null, hum: null };
-
-        return { moist: splitStr[0], hum: splitStr[1] };
-      }
-
-      let port = null;
 
       window.onload = async () => {
         setTimeout(async () => {
@@ -138,21 +133,16 @@
 
           if (resyncBtn) {
             resyncBtn.addEventListener("click", async () => {
-              port = await connectToSerial(0x2341);
-
-              if (port) {
-                await readData(humidityLevel);
-              }
+              await connectToSerial();
+              await startSerialLoop(humidityLevel);
             });
           }
 
           if (waterNowBtn) {
             console.log("Asked to water!");
             waterNowBtn.addEventListener("click", async () => {
-              if (port) {
-                await writeData(port, 77);
-                await readData(humidityLevel);
-              }
+              console.log("Watering triggered");
+              if (port) queueWrite(77);
             });
           }
         }, 1500);
