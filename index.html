@@ -141,7 +141,7 @@
             console.log("Asked to water!");
             waterNowBtn.addEventListener("click", async () => {
               console.log("Watering triggered");
-              if (port) queueWrite(77);
+              if (port) writeQueue.push(77);
             });
           }
         }, 1500);
