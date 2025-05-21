@@ -60,7 +60,7 @@
         }
       }
 
-      async function startSerialLoop(humidityLevelDOM) {
+      async function startSerialLoop(humidityLevelDOM, solarLevelDOM) {
         if (!port || !port.readable || readingLoopRunning) return;
 
         const textDecoder = new TextDecoderStream();
@@ -96,6 +96,10 @@
               if (parsed.moist && humidityLevelDOM) {
                 humidityLevelDOM.innerText = parsed.moist;
               }
+
+              if (parsed.hum && solarLevelDOM) {
+                solarLevelDOM.innerText = parsed.moist;
+              }
             }
           } catch (err) {
             console.error("Serial loop error", err);
@@ -120,6 +124,10 @@
             "#root > div > div > div > div > div > div:nth-child(4) > div > div:nth-child(1) > div > h1"
           );
 
+          var solarLevel = document.querySelector(
+            "#root > div > div > div > div > div > div:nth-child(4) > div > div:nth-child(2) > div > h1"
+          );
+
           var resyncBtn = document.querySelector(
             "#root > div > div > div > div > div > div.rt-Box.rt-r-mt-4 > div > button:nth-child(2)"
           );
@@ -133,7 +141,7 @@
           if (resyncBtn) {
             resyncBtn.addEventListener("click", async () => {
               await connectToSerial();
-              await startSerialLoop(humidityLevel);
+              await startSerialLoop(humidityLevel, humidityLevel);
             });
           }
 
